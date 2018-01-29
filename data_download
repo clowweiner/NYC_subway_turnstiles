@@ -1,0 +1,29 @@
+library(tidyverse)
+library(janitor)
+library(lubridate)
+
+# setting time zone
+Sys.setenv(TZ="America/New_York")
+
+#reading in turnstile data, read all columns in as string
+turnstile_jan_20 <- read_csv(
+  "http://web.mta.info/developers/data/nyct/turnstile/turnstile_180120.txt",
+  col_types=cols(.default="c")
+  )
+
+#delete division and descrption columns and clean names
+turnstile_clean <- turnstile_jan_20 %>%
+  select(-DIVISION, -DESC) %>%
+  clean_names()
+
+#change variable type, new variable is on the left, mdy is variable type function in lubridate
+turnstile_clean2 <- turnstile_clean %>%
+  mutate(entries_num=as.integer(entries),
+         exits_num=as.integer(exits),
+         date=mdy(date),
+         date_time=paste(date, time),
+         date_time=ymd_hms(date_time)
+         ) %>%
+  select(-entries, -exits)
+  
+  
